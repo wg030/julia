@@ -48,7 +48,7 @@ LIBUV_JLL_NAME := LibUV
 LLVM_VER := 11.0.0
 LLVM_JLL_NAME := libLLVM
 # We provide a way to subversively swap out which LLVM JLL we pull artifacts from
-ifeq ($(BINARYBUILDER_LLVM_ASSERTS), 1)
+ifeq ($(LLVM_ASSERTIONS), 1)
 LLVM_JLL_VER := 11.0.0+0
 LLVM_JLL_DOWNLOAD_NAME := libLLVM_assert
 endif
