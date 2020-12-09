@@ -357,6 +357,8 @@ public:
         assert(UnwindData);
         assert(SectionAddrCheck);
         assert(SectionLoadCheck);
+        assert(!memcmp(catchjmp, "\0\0\0\0\0\0\0\0\0\0\0\0", 12) &&
+               !memcmp(UnwindData, "\0\0\0\0\0\0\0\0\0\0\0\0", 12));
         catchjmp[0] = 0x48;
         catchjmp[1] = 0xb8; // mov RAX, QWORD PTR [&__julia_personality]
         *(uint64_t*)(&catchjmp[2]) = (uint64_t)&__julia_personality;

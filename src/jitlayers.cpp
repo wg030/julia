@@ -687,7 +687,7 @@ JuliaOJIT::JuliaOJIT(TargetMachine &TM, LLVMContext *LLVMCtx)
         report_fatal_error("FATAL: unable to dlopen self\n" + ErrorStr);
 
     GlobalJD.addGenerator(
-      std::move(*orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
+      cantFail(orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
         DL.getGlobalPrefix())));
 
     // Resolve non-lock free atomic functions in the libatomic1 library.
@@ -776,12 +776,9 @@ void JuliaOJIT::removeModule(ModuleHandleT H)
 
 JL_JITSymbol JuliaOJIT::findSymbol(StringRef Name, bool ExportedSymbolsOnly)
 {
-    if (ExportedSymbolsOnly) {
-        auto Sym = ES.lookup({&GlobalJD}, Name);
-        if (Sym)
-            return *Sym;
-    }
-    auto Sym = ES.lookup({&JD}, Name);
+    orc::JITDylib* SearchOrders[2] = {&GlobalJD, &JD};
+    ArrayRef<orc::JITDylib*> SearchOrder = makeArrayRef(&SearchOrders[ExportedSymbolsOnly ? 0 : 1], ExportedSymbolsOnly ? 2 : 1);
+    auto Sym = ES.lookup(SearchOrder, Name);
     if (Sym)
         return *Sym;
     return Sym.takeError();
@@ -795,13 +792,13 @@ JL_JITSymbol JuliaOJIT::findUnmangledSymbol(StringRef Name)
 uint64_t JuliaOJIT::getGlobalValueAddress(StringRef Name)
 {
     auto addr = findSymbol(getMangledName(Name), false);
-    return addr ? addr.getAddress().get() : 0;
+    return addr ? cantFail(addr.getAddress()) : 0;
 }
 
 uint64_t JuliaOJIT::getFunctionAddress(StringRef Name)
 {
     auto addr = findSymbol(getMangledName(Name), false);
-    return addr ? addr.getAddress().get() : 0;
+    return addr ? cantFail(addr.getAddress()) : 0;
 }
 
 static int globalUniqueGeneratedNames;
