@@ -15,7 +15,7 @@ CSL_JLL_NAME := CompilerSupportLibraries
 
 # Clang (paired with LLVM, only here as a JLL download)
 CLANG_JLL_NAME := Clang
-CLANG_JLL_VER  := 11.0.0+1
+CLANG_JLL_VER  := 11.0.0+2
 
 # DSFMT
 DSFMT_VER := 2.2.3
@@ -49,13 +49,13 @@ LLVM_VER := 11.0.0
 LLVM_JLL_NAME := libLLVM
 # We provide a way to subversively swap out which LLVM JLL we pull artifacts from
 ifeq ($(LLVM_ASSERTIONS), 1)
-LLVM_JLL_VER := 11.0.0+0
+LLVM_JLL_VER := 11.0.0+2
 LLVM_JLL_DOWNLOAD_NAME := libLLVM_assert
 endif
 
 # LLVM_tools (downloads LLVM_jll to get things like `lit` and `opt`)
 LLVM_TOOLS_JLL_NAME := LLVM
-LLVM_TOOLS_JLL_VER = 11.0.0+1
+LLVM_TOOLS_JLL_VER = 11.0.0+2
 
 # MbedTLS
 MBEDTLS_VER := 2.24.0
