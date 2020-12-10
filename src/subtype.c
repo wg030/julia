@@ -2892,6 +2892,19 @@ static int compareto_var(jl_value_t *x, jl_tvar_t *y, jl_stenv_t *e, int cmp)
     return ans;
 }
 
+// See if var y is reachable from x via bounds; used to avoid cycles.
+static int reachable_var(jl_value_t *x, jl_tvar_t *y, jl_stenv_t *e)
+{
+    if (x == (jl_value_t*)y)
+        return 1;
+    if (!jl_is_typevar(x))
+        return 0;
+    jl_varbinding_t *xv = lookup(e, (jl_tvar_t*)x);
+    if (xv == NULL)
+        return 0;
+    return reachable_var(xv->ub, y, e) || reachable_var(xv->lb, y, e);
+}
+
 // `param` means we are currently looking at a parameter of a type constructor
 // (as opposed to being outside any type constructor, or comparing variable bounds).
 // this is used to record the positions where type variables occur for the
@@ -2970,7 +2983,7 @@ static jl_value_t *intersect(jl_value_t *x, jl_value_t *y, jl_stenv_t *e, int pa
                     assert(yy->ub != y);
                     assert(yy->lb != y);
                 }
-                if (xx) {
+                if (xx && !reachable_var(y, (jl_tvar_t*)x, e)) {
                     if (!compareto_var(y, (jl_tvar_t*)x, e, -1))
                         xx->lb = y;
                     if (!compareto_var(y, (jl_tvar_t*)x, e,  1))

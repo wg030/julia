@@ -1814,3 +1814,23 @@ end
 
 # issue #24333
 @test_broken (Type{Union{Ref,Cvoid}} <: Type{Union{T,Cvoid}} where T)
+
+# issue #38423
+let
+    Either{L, R} = Union{Ref{L}, Val{R}}
+    A = Tuple{Type{Ref{L}}, Type{Either{L, <:Any}}} where L
+    B = Tuple{Type{Ref{L2}}, Type{Either{L1, R}}} where {L1, R, L2 <: L1}
+    I = typeintersect(A, B)
+    @test I != Union{}
+    @test_broken I <: A
+    @test_broken I <: B
+end
+
+# issue #36544
+let A = Tuple{T, Ref{T}, T} where {T},
+    B = Tuple{T, T, Ref{T}} where {T}
+    I = typeintersect(A, B)
+    @test I != Union{}
+    @test_broken I <: A
+    @test_broken I <: B
+end
