@@ -488,9 +488,7 @@ void JuliaOJIT::DebugObjectRegistrar::registerObject(RTDyldObjHandleT H, const O
             continue;
         if (!(Flags & object::BasicSymbolRef::SF_Exported))
             continue;
-        auto NameOrError = Symbol.getName();
-        assert(NameOrError);
-        auto Name = NameOrError.get();
+        auto Name = cantFail(Symbol.getName());
         auto Sym = JIT.CompileLayer.findSymbolIn(H, Name.str(), true);
         assert(Sym);
         // note: calling getAddress here eagerly finalizes H
